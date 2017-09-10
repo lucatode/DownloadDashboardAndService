@@ -30,6 +30,7 @@ func mux(s *mgo.Session, db string, collection string) *goji.Mux {
 	mux.HandleFunc(pat.Get("/downloads"), allDownloads(s, db, collection))
 	mux.HandleFunc(pat.Post("/downloads"), addDownload(s, db, collection))
 	//mux.HandleFunc(pat.Get("/downloads/:country"), downloadsByCountry(s, db, collection))
+	//mux.HandleFunc(pat.Get("/downloadsAt/:timeOfTheDay"), downloadsByCountry(s, db, collection))
 
 	return mux
 }
@@ -127,6 +128,10 @@ func addDownloadInsert(s *mgo.Session, d Download, db string, collection string)
 
 	return err
 }
+
+// func getDownloadsByCountry(s *mgo.Session, string country, db string, collection string) error {
+
+// }
 
 ///Utilities
 // This function handle the response with json whenever an error occurs
