@@ -28,6 +28,9 @@ func main() {
 func mux(s *mgo.Session, db string, collection string) *goji.Mux {
 	mux := goji.NewMux()
 	mux.HandleFunc(pat.Get("/downloads"), allDownloads(s, db, collection))
+	mux.HandleFunc(pat.Post("/downloads"), addDownload(s, db, collection))
+	//mux.HandleFunc(pat.Get("/downloads/:country"), downloadsByCountry(s, db, collection))
+
 	return mux
 }
 
@@ -61,6 +64,32 @@ func allDownloads(s *mgo.Session, db string, collection string) func(w http.Resp
 	}
 }
 
+func addDownload(s *mgo.Session, db string, collection string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// - Get download from arguments - Parse the request
+		//return val
+		var download Download
+		//create a decoder for request body
+		decoder := json.NewDecoder(r.Body)
+		//use the decoder
+		err := decoder.Decode(&download)
+		//...
+		if err != nil {
+			ErrorWithJSON(w, "Unable to decode request body", http.StatusBadRequest)
+		}
+
+		err = addDownloadInsert(s, download, db, collection)
+
+		if err != nil {
+			ErrorWithJSON(w, "Unable to insert a new Download", http.StatusBadRequest)
+		}
+
+		//Return response after insert status
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+	}
+}
+
 ///DB handling functions
 func allDownloadsQuery(s *mgo.Session, db string, collection string) ([]Download, error) {
 	//Get a new session
@@ -83,6 +112,20 @@ func allDownloadsQuery(s *mgo.Session, db string, collection string) ([]Download
 	}
 
 	return downloads, nil
+}
+
+func addDownloadInsert(s *mgo.Session, d Download, db string, collection string) error {
+	//Get a new session
+	session := s.Copy()
+	defer session.Close()
+
+	//Get Collection
+	c := session.DB(db).C(collection)
+
+	//Insert a book
+	err := c.Insert(d)
+
+	return err
 }
 
 ///Utilities

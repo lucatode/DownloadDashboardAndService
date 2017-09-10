@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,9 +12,15 @@ import (
 	mgo "gopkg.in/mgo.v2"
 )
 
-///DB Handling Tests
+/***************************************************
+  ___  ___ _____       _
+ |   \| _ )_   _|__ __| |_ ___
+ | |) | _ \ | |/ -_|_-<  _(_-<
+ |___/|___/ |_|\___/__/\__/__/
+
+****************************************************/
 // Test allDownloadsQuery on an empty collection
-func TestAllBooksQuery_Empty(t *testing.T) {
+func TestAllDownloadsQuery_Empty(t *testing.T) {
 
 	//Setup
 	session := getMgoSession("localhost")
@@ -32,19 +39,19 @@ func TestAllBooksQuery_Empty(t *testing.T) {
 	})
 }
 
-// Test allBooksQuery on a one document collection
-func TestAllBooksQuery_OneDoc(t *testing.T) {
+// Test allDownloadsQuery on a one document collection
+func TestAllDownloadsQuery_OneDoc(t *testing.T) {
 	//Setup
 	session := getMgoSession("localhost")
 	cleanTestDb(session, "TestDb", "TestCollection")
-	randomDownload := buildAStaticDownload()
-	insertDownloadForTest(session, randomDownload, "TestDb", "TestCollection")
+	staticDownload := buildAStaticDownload()
+	insertDownloadForTest(session, staticDownload, "TestDb", "TestCollection")
 
 	//Execution
-	t.Run("GET all books in one document collection", func(t *testing.T) {
+	t.Run("GET all downloads in one document collection", func(t *testing.T) {
 		res, err := allDownloadsQuery(session, "TestDb", "TestCollection")
 
-		downloadsExpected := []Download{randomDownload}
+		downloadsExpected := []Download{staticDownload}
 		downloadsLenExpected := 1
 
 		//Assertions
@@ -54,13 +61,45 @@ func TestAllBooksQuery_OneDoc(t *testing.T) {
 	})
 }
 
-///Routes Unit Tests
-func TestAllBooks_OneBook(t *testing.T) {
+//TODO: multiple entry retriving
+// ...
+
+//Test addDownload to add one document to the collection
+func TestAddDownloadInsert(t *testing.T) {
 	//Setup
 	session := getMgoSession("localhost")
 	cleanTestDb(session, "TestDb", "TestCollection")
-	randomDownload := buildAStaticDownload()
-	insertDownloadForTest(session, randomDownload, "TestDb", "TestCollection")
+	staticDownload := buildAStaticDownload()
+
+	//Execution
+	t.Run("POST a donwload in a collection", func(t *testing.T) {
+		err := addDownloadInsert(session, staticDownload, "TestDb", "TestCollection")
+
+		res, _ := allDownloadsQuery(session, "TestDb", "TestCollection")
+
+		downloadsExpected := []Download{staticDownload}
+		downloadsLenExpected := 1
+
+		//Assertions
+		assert.Equal(t, nil, err)
+		assert.Equal(t, downloadsLenExpected, len(res))
+		assert.Equal(t, downloadsExpected, res)
+	})
+}
+
+/**************************************************
+  ___          _          _____       _
+ | _ \___ _  _| |_ ___ __|_   _|__ __| |_ ___
+ |   / _ \ || |  _/ -_|_-< | |/ -_|_-<  _(_-<
+ |_|_\___/\_,_|\__\___/__/ |_|\___/__/\__/__/
+
+**************************************************/
+func TestAllDownloads_OneDownload(t *testing.T) {
+	//Setup
+	session := getMgoSession("localhost")
+	cleanTestDb(session, "TestDb", "TestCollection")
+	staticDownload := buildAStaticDownload()
+	insertDownloadForTest(session, staticDownload, "TestDb", "TestCollection")
 
 	//Execution
 	t.Run("GET /downloads", func(t *testing.T) {
@@ -85,7 +124,34 @@ func TestAllBooks_OneBook(t *testing.T) {
 
 }
 
-///Test Utilities
+func TestAddDownload_InsertOne(t *testing.T) {
+	//Setup
+	session := getMgoSession("localhost")
+	cleanTestDb(session, "TestDb", "TestCollection")
+	staticDownload := buildAStaticDownload()
+
+	//Execution
+	t.Run("POST /downloads", func(t *testing.T) {
+		s := httptest.NewServer(mux(session, "TestDb", "TestCollection"))
+		defer s.Close()
+		jsonValue, _ := json.Marshal(staticDownload)
+		res, err := http.Post(s.URL+"/downloads", "application/json", bytes.NewBuffer(jsonValue))
+
+		assert.NoError(t, err)
+		assert.Equal(t, 201, res.StatusCode)
+
+		defer res.Body.Close()
+
+	})
+}
+
+/**************************************************
+  _   _ _   _ _ _ _   _
+ | | | | |_(_) (_) |_(_)___ ___
+ | |_| |  _| | | |  _| / -_|_-<
+  \___/ \__|_|_|_|\__|_\___/__/
+
+**************************************************/
 func getMgoSession(connectionString string) *mgo.Session {
 	session, err := mgo.Dial(connectionString)
 	if err != nil {
