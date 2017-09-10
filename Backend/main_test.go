@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,7 +11,50 @@ import (
 	mgo "gopkg.in/mgo.v2"
 )
 
-///Routes Unit Test
+///DB Handling Tests
+// Test allDownloadsQuery on an empty collection
+func TestAllBooksQuery_Empty(t *testing.T) {
+
+	//Setup
+	session := getMgoSession("localhost")
+	cleanTestDb(session, "TestDb", "TestCollection")
+
+	//Execution
+	t.Run("GET all downloads in empty collection", func(t *testing.T) {
+		res, err := allDownloadsQuery(session, "TestDb", "TestCollection")
+
+		errorExpected := fmt.Errorf("No documents in the db")
+		var downloadsExpected []Download
+
+		//Assertions
+		assert.Equal(t, errorExpected, err)
+		assert.Equal(t, downloadsExpected, res)
+	})
+}
+
+// Test allBooksQuery on a one document collection
+func TestAllBooksQuery_OneDoc(t *testing.T) {
+	//Setup
+	session := getMgoSession("localhost")
+	cleanTestDb(session, "TestDb", "TestCollection")
+	randomDownload := buildAStaticDownload()
+	insertDownloadForTest(session, randomDownload, "TestDb", "TestCollection")
+
+	//Execution
+	t.Run("GET all books in one document collection", func(t *testing.T) {
+		res, err := allDownloadsQuery(session, "TestDb", "TestCollection")
+
+		downloadsExpected := []Download{randomDownload}
+		downloadsLenExpected := 1
+
+		//Assertions
+		assert.Equal(t, nil, err)
+		assert.Equal(t, downloadsLenExpected, len(res))
+		assert.Equal(t, downloadsExpected, res)
+	})
+}
+
+///Routes Unit Tests
 func TestAllBooks_OneBook(t *testing.T) {
 	//Setup
 	session := getMgoSession("localhost")
