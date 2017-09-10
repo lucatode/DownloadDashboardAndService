@@ -1,6 +1,45 @@
 package main
 
-import mgo "gopkg.in/mgo.v2"
+import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	mgo "gopkg.in/mgo.v2"
+)
+
+///Routes Unit Test
+func TestAllBooks_OneBook(t *testing.T) {
+	//Setup
+	session := getMgoSession("localhost")
+	cleanTestDb(session, "TestDb", "TestCollection")
+	randomDownload := buildAStaticDownload()
+	insertDownloadForTest(session, randomDownload, "TestDb", "TestCollection")
+
+	//Execution
+	t.Run("GET /downloads", func(t *testing.T) {
+		s := httptest.NewServer(mux(session, "TestDb", "TestCollection"))
+		defer s.Close()
+		res, err := http.Get(s.URL + "/downloads")
+		assert.NoError(t, err)
+		assert.Equal(t, 200, res.StatusCode)
+
+		//use the decoder
+		var download []Download
+		decoder := json.NewDecoder(res.Body)
+		err = decoder.Decode(&download)
+		if err != nil {
+			panic(err)
+		}
+
+		assert.Equal(t, 1, len(download))
+
+		defer res.Body.Close()
+	})
+
+}
 
 ///Test Utilities
 func getMgoSession(connectionString string) *mgo.Session {
