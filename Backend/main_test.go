@@ -21,7 +21,7 @@ func cleanTestDb(s *mgo.Session, db string, collection string) {
 
 }
 
-func insertBookForTest(s *mgo.Session, d Download, db string, collection string) {
+func insertDownloadForTest(s *mgo.Session, d Download, db string, collection string) {
 	session := s.Copy()
 	defer session.Close()
 
