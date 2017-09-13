@@ -75,6 +75,8 @@ func addDownload(s *mgo.Session, db string, collection string) func(w http.Respo
 		//use the decoder
 		err := decoder.Decode(&download)
 		//...
+		download.Country = getCountry(download.Latitude, download.Longitude)
+		//...
 		if err != nil {
 			ErrorWithJSON(w, "Unable to decode request body", http.StatusBadRequest)
 		}
@@ -132,6 +134,11 @@ func addDownloadInsert(s *mgo.Session, d Download, db string, collection string)
 // func getDownloadsByCountry(s *mgo.Session, string country, db string, collection string) error {
 
 // }
+
+//Returns 2 chars country code
+func getCountry(lat float64, lng float64) string {
+	return NewLocation(lat, lng)
+}
 
 ///Utilities
 // This function handle the response with json whenever an error occurs

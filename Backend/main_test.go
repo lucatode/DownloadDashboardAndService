@@ -91,7 +91,25 @@ func TestAddDownloadInsert(t *testing.T) {
 
 //GetDownloadsByCountry
 func TestGetDownloadsByCountry(t *testing.T) {
+	//Setup
+	session := getMgoSession("localhost")
+	cleanTestDb(session, "TestDb", "TestCollection")
+	staticDownload := buildAStaticDownload()
 
+	//Execution
+	t.Run("POST a donwload in a collection", func(t *testing.T) {
+		err := addDownloadInsert(session, staticDownload, "TestDb", "TestCollection")
+
+		res, _ := allDownloadsQuery(session, "TestDb", "TestCollection")
+
+		downloadsExpected := []Download{staticDownload}
+		downloadsLenExpected := 1
+
+		//Assertions
+		assert.Equal(t, nil, err)
+		assert.Equal(t, downloadsLenExpected, len(res))
+		assert.Equal(t, downloadsExpected, res)
+	})
 }
 
 /**************************************************
@@ -214,3 +232,12 @@ func buildAStaticDownload() Download {
  |____\___/\__\__,_|\__|_\___/_||_|___/\___|_|  \_/|_\__\___|
 
 **************************************************/
+
+func TestGetCountry(t *testing.T) {
+	//Setup
+
+	//Execution
+	t.Run("Get Country", func(t *testing.T) {
+
+	})
+}
