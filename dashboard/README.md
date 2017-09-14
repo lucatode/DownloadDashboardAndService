@@ -1,6 +1,8 @@
-# dashboard
+# map dashboard
 
-> Dashboard handling data request
+####Make http request to show data in the map - created with https://github.com/voluntadpear/vue-choropleth
+
+###Still not working
 
 ## Build Setup
 
