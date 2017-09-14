@@ -10,7 +10,7 @@
 ```
 
 ## POST /downloads 
-#### Get from OpenStreetMap (reverse Geocode) - Store country
+#### Get from OpenStreetMap (reverse Geocode) & store country
 ``` bash
     downloads:{_id,appid,latitude,longitude}
 ```
