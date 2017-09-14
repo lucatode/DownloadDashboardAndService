@@ -1,6 +1,7 @@
 # Microservice using VueJS, Go and MongoDB
 
-This application should handle data on a downloaded application.
+The backend application should handle data on a downloaded application.
+The frontend provides a dashboard, made by widgets, to show data.
 
 ### Backend - for more info see ./Backend/README.rm
   - Recive and store data
