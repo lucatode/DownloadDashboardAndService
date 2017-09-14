@@ -29,8 +29,10 @@ func mux(s *mgo.Session, db string, collection string) *goji.Mux {
 	mux := goji.NewMux()
 	mux.HandleFunc(pat.Get("/downloads"), allDownloads(s, db, collection))
 	mux.HandleFunc(pat.Post("/downloads"), addDownload(s, db, collection))
-	//mux.HandleFunc(pat.Get("/downloads/:country"), downloadsByCountry(s, db, collection))
-	//mux.HandleFunc(pat.Get("/downloadsAt/:timeOfTheDay"), downloadsByCountry(s, db, collection))
+	//mux.HandleFunc(pat.Get("/countDownloadsByCountry"), countDownloadsByCountry(s, db, collection))
+	//mux.HandleFunc(pat.Get("/downloadsByCountry/:country"), downloadsByCountry(s, db, collection))
+	//mux.HandleFunc(pat.Get("/countDownloadsByTime"), countDownloadsByTime(s, db, collection))
+	//mux.HandleFunc(pat.Get("/downloadsByTime/:time"), downloadsByTime(s, db, collection))
 
 	return mux
 }

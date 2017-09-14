@@ -1,6 +1,7 @@
 # Go Microservice With MongoDB
 
-
+### Require MongoDB run locally
+#### //TODO: make it configurable
 
 ## GET /downloads
 
@@ -26,6 +27,6 @@
     [downloadsCount:{country,Count}]
 ```
 
-//TODO: GET /downloadsByTime/:dayTime
+### //TODO: GET /downloadsByTime/:dayTime
 
-//TODO: GET /countDownloadsByTime
+### //TODO: GET /countDownloadsByTime
