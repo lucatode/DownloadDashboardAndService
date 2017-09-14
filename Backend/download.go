@@ -7,3 +7,8 @@ type Download struct {
 	DownloadedAt string  "json:downloadedAt"
 	Country      string  "json:country"
 }
+
+type DownloadByCountry struct {
+	Country string "json:country"
+	Count   int    "json:count"
+}

@@ -89,8 +89,8 @@ func TestAddDownloadInsert(t *testing.T) {
 
 //TODO: empty insert with POST /downloads
 
-//GetDownloadsByCountry
-func TestGetDownloadsByCountry(t *testing.T) {
+//GetDownloadsByCountry - ok
+func TestGetDownloadsByCountry_ok(t *testing.T) {
 	//Setup
 	session := getMgoSession("localhost")
 	cleanTestDb(session, "TestDb", "TestCollection")
@@ -100,7 +100,7 @@ func TestGetDownloadsByCountry(t *testing.T) {
 	t.Run("POST a donwload in a collection", func(t *testing.T) {
 		err := addDownloadInsert(session, staticDownload, "TestDb", "TestCollection")
 
-		res, _ := allDownloadsQuery(session, "TestDb", "TestCollection")
+		res, _ := getDownloadsByCountry(session, "it", "TestDb", "TestCollection")
 
 		downloadsExpected := []Download{staticDownload}
 		downloadsLenExpected := 1
@@ -109,6 +109,24 @@ func TestGetDownloadsByCountry(t *testing.T) {
 		assert.Equal(t, nil, err)
 		assert.Equal(t, downloadsLenExpected, len(res))
 		assert.Equal(t, downloadsExpected, res)
+	})
+}
+
+//GetDownloadsByCountry - ko
+func TestGetDownloadsByCountry_ko(t *testing.T) {
+	//Setup
+	session := getMgoSession("localhost")
+	cleanTestDb(session, "TestDb", "TestCollection")
+	staticDownload := buildAStaticDownload()
+
+	//Execution
+	t.Run("POST a donwload in a collection", func(t *testing.T) {
+		addDownloadInsert(session, staticDownload, "TestDb", "TestCollection")
+
+		_, err2 := getDownloadsByCountry(session, "ru", "TestDb", "TestCollection")
+
+		//Assertions
+		assert.NotEqual(t, nil, err2)
 	})
 }
 
@@ -207,12 +225,13 @@ func insertDownloadForTest(s *mgo.Session, d Download, db string, collection str
 	}
 }
 
-func buildADownload(appId string, lo float64, la float64, time string) Download {
+func buildADownload(appId string, lo float64, la float64, time string, country string) Download {
 	return Download{
 		AppId:        appId,
 		Longitude:    lo,
 		Latitude:     la,
 		DownloadedAt: time,
+		Country:      country,
 	}
 }
 
@@ -222,6 +241,7 @@ func buildAStaticDownload() Download {
 		45.0,
 		45.0,
 		"12:45.30.000",
+		"it",
 	)
 }
 
@@ -232,12 +252,3 @@ func buildAStaticDownload() Download {
  |____\___/\__\__,_|\__|_\___/_||_|___/\___|_|  \_/|_\__\___|
 
 **************************************************/
-
-func TestGetCountry(t *testing.T) {
-	//Setup
-
-	//Execution
-	t.Run("Get Country", func(t *testing.T) {
-
-	})
-}

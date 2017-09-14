@@ -131,9 +131,26 @@ func addDownloadInsert(s *mgo.Session, d Download, db string, collection string)
 	return err
 }
 
-// func getDownloadsByCountry(s *mgo.Session, string country, db string, collection string) error {
+func getDownloadsByCountry(s *mgo.Session, string country, db string, collection string) ([]DownloadByCountry, error) {
+	//Get a new session
+	session := s.Copy()
+	defer session.Close()
 
-// }
+	c := session.DB(db).C(collection)
+
+	var downloads []DownloadByCountry
+
+	pipe := c.Pipe(bson.M{"$group": bson.M{"_id": "$country", "country": bson.M{"$push": "$$ROOT", "count": bson.M{"$sum": "1"}}}})
+
+	iter := pipe.Iter()
+	iter.All(&downloads)
+
+	if len(downloads) == 0 {
+		fmt.Println("No documents in the db")
+		return downloads, fmt.Errorf("No documents in the db")
+	}
+	return downloads, nil
+}
 
 //Returns 2 chars country code
 func getCountry(lat float64, lng float64) string {
