@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 /***************************************************
@@ -23,12 +24,12 @@ import (
 func TestAllDownloadsQuery_Empty(t *testing.T) {
 
 	//Setup
-	session := getMgoSession("localhost")
-	cleanTestDb(session, "TestDb", "TestCollection")
+	session := NewTest()
+	cleanTestDb(session, "TestCollection")
 
 	//Execution
 	t.Run("GET all downloads in empty collection", func(t *testing.T) {
-		res, err := allDownloadsQuery(session, "TestDb", "TestCollection")
+		res, err := allDownloadsQuery(session, "TestCollection")
 
 		errorExpected := fmt.Errorf("No documents in the db")
 		var downloadsExpected []Download
@@ -42,14 +43,14 @@ func TestAllDownloadsQuery_Empty(t *testing.T) {
 // Test allDownloadsQuery on a one document collection
 func TestAllDownloadsQuery_OneDoc(t *testing.T) {
 	//Setup
-	session := getMgoSession("localhost")
-	cleanTestDb(session, "TestDb", "TestCollection")
+	session := NewTest()
+	cleanTestDb(session, "TestCollection")
 	staticDownload := buildAStaticDownload()
-	insertDownloadForTest(session, staticDownload, "TestDb", "TestCollection")
+	insertDownloadForTest(session, staticDownload, "TestCollection")
 
 	//Execution
 	t.Run("GET all downloads in one document collection", func(t *testing.T) {
-		res, err := allDownloadsQuery(session, "TestDb", "TestCollection")
+		res, err := allDownloadsQuery(session, "TestCollection")
 
 		downloadsExpected := []Download{staticDownload}
 		downloadsLenExpected := 1
@@ -67,24 +68,32 @@ func TestAllDownloadsQuery_OneDoc(t *testing.T) {
 //Test addDownload to add one document to the collection
 func TestAddDownloadInsert(t *testing.T) {
 	//Setup
-	session := getMgoSession("localhost")
-	cleanTestDb(session, "TestDb", "TestCollection")
+	session := NewTest()
+	cleanTestDb(session, "TestCollection")
 	staticDownload := buildAStaticDownload()
 
 	//Execution
-	t.Run("POST a donwload in a collection", func(t *testing.T) {
-		err := addDownloadInsert(session, staticDownload, "TestDb", "TestCollection")
+	//t.Run("POST a donwload in a collection", func(t *testing.T) {
+	err := addDownloadInsert(session, staticDownload, "TestCollection")
+	if err != nil {
+		fmt.Println("Unable to insert a download")
+		panic(err)
+	}
 
-		res, _ := allDownloadsQuery(session, "TestDb", "TestCollection")
+	res, err2 := allDownloadsQuery(session, "TestCollection")
+	if err2 != nil {
+		fmt.Println("Unable to query download")
+		panic(err2)
+	}
 
-		downloadsExpected := []Download{staticDownload}
-		downloadsLenExpected := 1
+	downloadsExpected := []Download{staticDownload}
+	downloadsLenExpected := 1
 
-		//Assertions
-		assert.Equal(t, nil, err)
-		assert.Equal(t, downloadsLenExpected, len(res))
-		assert.Equal(t, downloadsExpected, res)
-	})
+	//Assertions
+	assert.Equal(t, nil, err)
+	assert.Equal(t, downloadsLenExpected, len(res))
+	assert.Equal(t, downloadsExpected, res)
+	//})
 }
 
 //TODO: empty insert with POST /downloads
@@ -92,40 +101,41 @@ func TestAddDownloadInsert(t *testing.T) {
 //GetDownloadsByCountry - ok
 func TestGetDownloadsByCountry_ok(t *testing.T) {
 	//Setup
-	session := getMgoSession("localhost")
-	cleanTestDb(session, "TestDb", "TestCollection")
+	session := NewTest()
+	cleanTestDb(session, "TestCollection")
 	staticDownload := buildAStaticDownload()
 
 	//Execution
 	t.Run("POST a donwload in a collection", func(t *testing.T) {
-		err := addDownloadInsert(session, staticDownload, "TestDb", "TestCollection")
+		err := addDownloadInsert(session, staticDownload, "TestCollection")
 
-		res, _ := getDownloadsByCountry(session, "it", "TestDb", "TestCollection")
+		res, _ := countDownloadsByCountry(session, "TestCollection")
 
-		downloadsExpected := []Download{staticDownload}
+		// downloadsExpected := []Download{staticDownload}
 		downloadsLenExpected := 1
 
 		//Assertions
 		assert.Equal(t, nil, err)
 		assert.Equal(t, downloadsLenExpected, len(res))
-		assert.Equal(t, downloadsExpected, res)
 	})
 }
 
 //GetDownloadsByCountry - ko
 func TestGetDownloadsByCountry_ko(t *testing.T) {
 	//Setup
-	session := getMgoSession("localhost")
-	cleanTestDb(session, "TestDb", "TestCollection")
-	staticDownload := buildAStaticDownload()
+	session := NewTest()
+	cleanTestDb(session, "TestCollection")
+	//staticDownload := buildAStaticDownload()
+	downloadsLenExpected := 0
 
 	//Execution
 	t.Run("POST a donwload in a collection", func(t *testing.T) {
-		addDownloadInsert(session, staticDownload, "TestDb", "TestCollection")
+		//addDownloadInsert(session, staticDownload, "TestCollection")
 
-		_, err2 := getDownloadsByCountry(session, "ru", "TestDb", "TestCollection")
+		res, err2 := countDownloadsByCountry(session, "TestCollection")
 
 		//Assertions
+		assert.Equal(t, downloadsLenExpected, len(res))
 		assert.NotEqual(t, nil, err2)
 	})
 }
@@ -139,14 +149,14 @@ func TestGetDownloadsByCountry_ko(t *testing.T) {
 **************************************************/
 func TestAllDownloads_OneDownload(t *testing.T) {
 	//Setup
-	session := getMgoSession("localhost")
-	cleanTestDb(session, "TestDb", "TestCollection")
+	session := NewTest()
+	cleanTestDb(session, "TestCollection")
 	staticDownload := buildAStaticDownload()
-	insertDownloadForTest(session, staticDownload, "TestDb", "TestCollection")
+	insertDownloadForTest(session, staticDownload, "TestCollection")
 
 	//Execution
 	t.Run("GET /downloads", func(t *testing.T) {
-		s := httptest.NewServer(mux(session, "TestDb", "TestCollection"))
+		s := httptest.NewServer(mux(session, "TestCollection"))
 		defer s.Close()
 		res, err := http.Get(s.URL + "/downloads")
 		assert.NoError(t, err)
@@ -169,13 +179,13 @@ func TestAllDownloads_OneDownload(t *testing.T) {
 
 func TestAddDownload_InsertOne(t *testing.T) {
 	//Setup
-	session := getMgoSession("localhost")
-	cleanTestDb(session, "TestDb", "TestCollection")
+	session := NewTest()
+	cleanTestDb(session, "TestCollection")
 	staticDownload := buildAStaticDownload()
 
 	//Execution
 	t.Run("POST /downloads", func(t *testing.T) {
-		s := httptest.NewServer(mux(session, "TestDb", "TestCollection"))
+		s := httptest.NewServer(mux(session, "TestCollection"))
 		defer s.Close()
 		jsonValue, _ := json.Marshal(staticDownload)
 		res, err := http.Post(s.URL+"/downloads", "application/json", bytes.NewBuffer(jsonValue))
@@ -195,31 +205,39 @@ func TestAddDownload_InsertOne(t *testing.T) {
   \___/ \__|_|_|_|\__|_\___/__/
 
 **************************************************/
-func getMgoSession(connectionString string) *mgo.Session {
-	session, err := mgo.Dial(connectionString)
-	if err != nil {
-		panic(err)
-	}
-	return session
+// func getMgoSession(connectionString string) *mgo.Database {
+// 	dialInfo := &mgo.DialInfo{
+// 		Addrs:    []string{MongoDBHosts},
+// 		Timeout:  30 * time.Second,
+// 		Database: AuthDatabase,
+// 		Username: AuthUserName,
+// 		Password: AuthPassword,
+// 	}
+
+// 	session, err := mgo.DialWithInfo(dialInfo)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	session.SetMode(mgo.Monotonic, true)
+
+// 	return session
+// }
+
+func cleanTestDb(d *mgo.Database, collection string) {
+
+	c := d.C(collection) //sess.DB("mydb").C("mycollection")
+
+	c.RemoveAll(bson.M{})
+
 }
 
-func cleanTestDb(s *mgo.Session, db string, collection string) {
-	session := s.Copy()
-	defer session.Close()
+func insertDownloadForTest(db *mgo.Database, dl Download, collection string) {
+	// session := s.Copy()
+	// defer session.Close()
 
-	c := session.DB(db).C(collection)
-
-	c.DropCollection()
-
-}
-
-func insertDownloadForTest(s *mgo.Session, d Download, db string, collection string) {
-	session := s.Copy()
-	defer session.Close()
-
-	c := session.DB(db).C(collection)
-
-	err := c.Insert(d)
+	c := db.C(collection)
+	err := c.Insert(dl)
 	if err != nil {
 		panic(err)
 	}

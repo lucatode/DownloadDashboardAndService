@@ -13,36 +13,31 @@ import (
 )
 
 func main() {
-	connectionString := "localhost"
-	session, err := mgo.Dial(connectionString)
 
-	if err != nil {
-		panic(err)
-	}
-	defer session.Close()
+	database := New()
 
-	http.ListenAndServe("localhost:8000", mux(session, "AppDashboard", "Downloads"))
+	http.ListenAndServe("localhost:8080", mux(database, "Downloads"))
 }
 
 ///Mux function
-func mux(s *mgo.Session, db string, collection string) *goji.Mux {
+func mux(db *mgo.Database, collection string) *goji.Mux {
 	mux := goji.NewMux()
-	mux.HandleFunc(pat.Get("/downloads"), allDownloads(s, db, collection))
-	mux.HandleFunc(pat.Post("/downloads"), addDownload(s, db, collection))
-	//mux.HandleFunc(pat.Get("/countDownloadsByCountry"), countDownloadsByCountry(s, db, collection))
-	//mux.HandleFunc(pat.Get("/downloadsByCountry/:country"), downloadsByCountry(s, db, collection))
-	//mux.HandleFunc(pat.Get("/countDownloadsByTime"), countDownloadsByTime(s, db, collection))
-	//mux.HandleFunc(pat.Get("/downloadsByTime/:time"), downloadsByTime(s, db, collection))
+	mux.HandleFunc(pat.Get("/downloads"), allDownloads(db, collection))
+	mux.HandleFunc(pat.Post("/downloads"), addDownload(db, collection))
+	mux.HandleFunc(pat.Get("/countDownloadsByCountry"), getCountDlByCountry(db, collection))
+	//mux.HandleFunc(pat.Get("/downloadsByCountry/:country"), downloadsByCountry(s, collection))
+	//mux.HandleFunc(pat.Get("/countDownloadsByTime"), countDownloadsByTime(s, collection))
+	//mux.HandleFunc(pat.Get("/downloadsByTime/:time"), downloadsByTime(s, collection))
 
 	return mux
 }
 
 ///Route handling functions
 //This function handle '/downloads' route GET calls - Retriving all downloads in the db
-func allDownloads(s *mgo.Session, db string, collection string) func(w http.ResponseWriter, r *http.Request) {
+func allDownloads(db *mgo.Database, collection string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//Query the db
-		downloads, err := allDownloadsQuery(s, db, collection)
+		downloads, err := allDownloadsQuery(db, collection)
 
 		//Evaluate errors
 		if err != nil {
@@ -67,7 +62,7 @@ func allDownloads(s *mgo.Session, db string, collection string) func(w http.Resp
 	}
 }
 
-func addDownload(s *mgo.Session, db string, collection string) func(w http.ResponseWriter, r *http.Request) {
+func addDownload(db *mgo.Database, collection string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// - Get download from arguments - Parse the request
 		//return val
@@ -83,7 +78,7 @@ func addDownload(s *mgo.Session, db string, collection string) func(w http.Respo
 			ErrorWithJSON(w, "Unable to decode request body", http.StatusBadRequest)
 		}
 
-		err = addDownloadInsert(s, download, db, collection)
+		err = addDownloadInsert(db, download, collection)
 
 		if err != nil {
 			ErrorWithJSON(w, "Unable to insert a new Download", http.StatusBadRequest)
@@ -96,12 +91,9 @@ func addDownload(s *mgo.Session, db string, collection string) func(w http.Respo
 }
 
 ///DB handling functions
-func allDownloadsQuery(s *mgo.Session, db string, collection string) ([]Download, error) {
-	//Get a new session
-	session := s.Copy()
-	defer session.Close()
+func allDownloadsQuery(db *mgo.Database, collection string) ([]Download, error) {
 
-	c := session.DB(db).C(collection)
+	c := db.C(collection)
 
 	var downloads []Download
 	err := c.Find(bson.M{}).All(&downloads)
@@ -119,13 +111,13 @@ func allDownloadsQuery(s *mgo.Session, db string, collection string) ([]Download
 	return downloads, nil
 }
 
-func addDownloadInsert(s *mgo.Session, d Download, db string, collection string) error {
+func addDownloadInsert(db *mgo.Database, d Download, collection string) error {
 	//Get a new session
-	session := s.Copy()
-	defer session.Close()
+	// session := s.Copy()
+	// defer session.Close()
 
 	//Get Collection
-	c := session.DB(db).C(collection)
+	c := db.C(collection)
 
 	//Insert a book
 	err := c.Insert(d)
@@ -133,16 +125,43 @@ func addDownloadInsert(s *mgo.Session, d Download, db string, collection string)
 	return err
 }
 
-func getDownloadsByCountry(s *mgo.Session, string country, db string, collection string) ([]DownloadByCountry, error) {
-	//Get a new session
-	session := s.Copy()
-	defer session.Close()
+func getCountDlByCountry(db *mgo.Database, collection string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		//Query the db
+		downloads, err := countDownloadsByCountry(db, collection)
 
-	c := session.DB(db).C(collection)
+		//Evaluate errors
+		if err != nil {
+			//Handle response with json - Input: writer, message, code
+			ErrorWithJSON(w, "Replace with message", http.StatusInternalServerError)
+			//Log the error
+			log.Println("Failed to get all books", err)
+			//Exit
+			return
+		}
+
+		//Input: dbQueryResponse, prefix, indent
+		respBody, err := json.MarshalIndent(downloads, "", " ")
+
+		//Check error on Marshaling
+		if err != nil {
+			log.Fatal(err)
+		}
+		//Handle response with json - Input: writer, jsonBody, status
+		ResponseWithJSON(w, respBody, http.StatusOK)
+
+	}
+}
+
+func countDownloadsByCountry(db *mgo.Database, collection string) ([]DownloadByCountry, error) {
+
+	c := db.C(collection)
 
 	var downloads []DownloadByCountry
 
-	pipe := c.Pipe(bson.M{"$group": bson.M{"_id": "$country", "country": bson.M{"$push": "$$ROOT", "count": bson.M{"$sum": "1"}}}})
+	pipeline := []bson.M{bson.M{"$group": bson.M{"_id": "$country", "count": bson.M{"$sum": "1"}}}}
+
+	pipe := c.Pipe(pipeline)
 
 	iter := pipe.Iter()
 	iter.All(&downloads)

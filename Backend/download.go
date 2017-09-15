@@ -9,6 +9,6 @@ type Download struct {
 }
 
 type DownloadByCountry struct {
-	Country string "json:country"
+	Country string "json:_id"
 	Count   int    "json:count"
 }
