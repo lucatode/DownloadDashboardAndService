@@ -14,10 +14,10 @@ type DB struct {
 }
 
 const (
-	MongoDBHosts = "ds121212.mlab.com:21212" //"s135574.mlab.com:35574"
-	AuthDatabase = "microservicestest"       //"microservice-mongodb"
-	AuthUserName = "guest"                   //"Guest"
-	AuthPassword = "guest"                   //"Password01"
+	MongoDBHosts = "ds121212.mlab.com:21212"
+	AuthDatabase = "microservicestest"
+	AuthUserName = "guest"
+	AuthPassword = "guest"
 )
 
 var _init_ctx sync.Once
