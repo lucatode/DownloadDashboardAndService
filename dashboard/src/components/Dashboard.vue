@@ -16,10 +16,10 @@
             </div>
         </div> -->
         <div class="row">
-            <div class="col-xs-4">
+            <div class="col-xs-6">
                 <insert-widget></insert-widget>
             </div>
-            <div class="col-xs-4">
+            <div class="col-xs-6">
                 <donut-chart-widget></donut-chart-widget>
             </div>
         </div>

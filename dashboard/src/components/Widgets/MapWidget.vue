@@ -9,7 +9,7 @@
             :geojson="worldGeojson" 
             :center="center" 
             :colorScale="colorScale" 
-            mapStyle="height: 300px;" 
+            mapStyle="height: 400px;" 
             :zoom="3" 
             :mapOptions="mapOptions">
         <template scope="props">

@@ -1,8 +1,7 @@
 <template>
     <div>
-        <p>
-            DonutChart
-        </p>
+        <h3>DonutChart</h3>
+        <hr>
         <donut-chart 
             id="donut" 
             :data="donutData" 
