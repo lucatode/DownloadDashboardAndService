@@ -1,13 +1,25 @@
 <template>
-    <div>
+    <div class="container">
         <h2>This will be dashboard header</h2>
-        <map-widget></map-widget>
-        <chart-widget></chart-widget>        
+        <div class="row">
+            <div class="col-xs-12">
+                <map-widget></map-widget>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6">
+                <insert-widget></insert-widget>
+            </div>
+            <div class="col-xs-6">
+                <chart-widget></chart-widget>
+            </div>
+        </div>
     </div>
 </template>
 <script>
     import MapWidget from './Widgets/MapWidget.vue'
     import ChartWidget from './Widgets/ChartWidget.vue'
+    import InsertWidget from './Widgets/InsertWidget.vue'
     import {eventBus} from './../main'
 
     export default {
@@ -17,7 +29,8 @@
         },
         components:{
             'map-widget': MapWidget,
-            'chart-widget': ChartWidget
+            'chart-widget': ChartWidget,
+            'insert-widget': InsertWidget
         },
         methods:{
             // updateMapWidget(){
