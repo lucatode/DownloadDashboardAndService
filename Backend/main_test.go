@@ -292,10 +292,10 @@ func buildADownload(appId string, lo string, la string, time string, country str
 
 func buildAStaticDownload() Download {
 	return buildADownload(
-		"IOS_ALERT",
+		"iOS_App#1",
 		"45.0",
 		"45.0",
-		"12:45.30.000",
+		"12:45",
 		"it",
 	)
 }

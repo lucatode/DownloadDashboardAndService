@@ -94,7 +94,7 @@ func addDownload(db *mgo.Database, collection string) func(w http.ResponseWriter
 		//use the decoder
 		err := decoder.Decode(&download)
 		//...
-		
+
 		//...
 		if err != nil {
 			ErrorWithJSON(w, "Unable to decode request body", http.StatusBadRequest)
@@ -104,10 +104,9 @@ func addDownload(db *mgo.Database, collection string) func(w http.ResponseWriter
 
 		valid := validateDownload(download)
 
-		if err != true{
+		if valid != true {
 			ErrorWithJSON(w, "Data passed not valid", http.StatusBadRequest)
 		}
-
 
 		err = addDownloadInsert(db, download, collection)
 
