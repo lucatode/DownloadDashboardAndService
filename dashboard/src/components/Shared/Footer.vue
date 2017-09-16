@@ -15,6 +15,7 @@ export default{
     methods:{
         refresh(){
             eventBus.refresh()
+            eventBus.refreshView()
         }
     }
 }

@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import App from './App.vue'
 import VueResource from 'vue-resource'
+import Raphael from 'raphael/raphael'
+global.Raphael = Raphael
 
 Vue.use(VueResource);
 
@@ -18,7 +20,10 @@ export const eventBus = new Vue({
     },
     callRefreshMapData(map,data){
       this.$emit('refreshMapData', map, data)
-    }    
+    },
+    refreshView(){
+      this.$forceUpdate()
+    }   
   }
 });
 

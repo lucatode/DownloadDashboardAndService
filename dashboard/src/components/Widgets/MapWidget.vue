@@ -38,7 +38,7 @@
             return{
                 center: [0, 0],
                 notUpdating: true,
-                colorScale: ["ffffff", "ffffff", "ffffff"],
+                colorScale: ["000000", "cccccc", "ffffff"],
                 value: {
                     key: "amount_w",
                     metric: " downloads"
@@ -70,13 +70,13 @@
         created(){ //on component created
             eventBus.$on('refreshMap',(data)=>{ //register on event
                 if(this.zero === false){
-                    eventBus.callRefreshMapData(worldGeojson,pyDepartmentsDataZero )
+                    eventBus.callRefreshMapData(this.worldGeojson,this.pyDepartmentsDataZero )
                     console.log('zero')
                 }else{
-                    eventBus.callRefreshMapData(worldGeojson,pyDepartmentsData )
+                    eventBus.callRefreshMapData(this.worldGeojson,this.pyDepartmentsData )
                     console.log('normal')
                 }
-
+                this.$forceUpdate()
                 this.zero = !this.zero 
          
             })

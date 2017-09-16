@@ -106,17 +106,22 @@ func TestGetDownloadsByCountry_ok(t *testing.T) {
 	staticDownload := buildAStaticDownload()
 
 	//Execution
-	t.Run("POST a donwload in a collection", func(t *testing.T) {
+	t.Run("Get downloads county by country - working", func(t *testing.T) {
 		err := addDownloadInsert(session, staticDownload, "TestCollection")
 
 		res, _ := countDownloadsByCountry(session, "TestCollection")
 
-		// downloadsExpected := []Download{staticDownload}
 		downloadsLenExpected := 1
+		expectedCountry := "it"
+		expectedCount := 1
 
 		//Assertions
 		assert.Equal(t, nil, err)
 		assert.Equal(t, downloadsLenExpected, len(res))
+		count := res[0]
+		assert.Equal(t, expectedCountry, count.Country)
+		assert.Equal(t, expectedCount, count.Count)
+
 	})
 }
 
@@ -129,7 +134,7 @@ func TestGetDownloadsByCountry_ko(t *testing.T) {
 	downloadsLenExpected := 0
 
 	//Execution
-	t.Run("POST a donwload in a collection", func(t *testing.T) {
+	t.Run("Get downloads county by country - no data", func(t *testing.T) {
 		//addDownloadInsert(session, staticDownload, "TestCollection")
 
 		res, err2 := countDownloadsByCountry(session, "TestCollection")
@@ -171,6 +176,38 @@ func TestAllDownloads_OneDownload(t *testing.T) {
 		}
 
 		assert.Equal(t, 1, len(download))
+
+		defer res.Body.Close()
+	})
+
+}
+
+func TestCountDownloadsByCountry_OneDownload(t *testing.T) {
+	//Setup
+	session := NewTest()
+	cleanTestDb(session, "TestCollection")
+	staticDownload := buildAStaticDownload()
+	insertDownloadForTest(session, staticDownload, "TestCollection")
+
+	//Execution
+	t.Run("GET /countDownloadByCountry", func(t *testing.T) {
+		s := httptest.NewServer(mux(session, "TestCollection"))
+		defer s.Close()
+		res, err := http.Get(s.URL + "/countDownloadsByCountry")
+		assert.NoError(t, err)
+		assert.Equal(t, 200, res.StatusCode)
+
+		//use the decoder
+		var download []DownloadByCountry
+		decoder := json.NewDecoder(res.Body)
+		err = decoder.Decode(&download)
+		if err != nil {
+			panic(err)
+		}
+
+		assert.Equal(t, 1, len(download))
+		assert.Equal(t, 1, download[0].Count)
+		assert.Equal(t, "it", download[0].Country)
 
 		defer res.Body.Close()
 	})
@@ -243,7 +280,7 @@ func insertDownloadForTest(db *mgo.Database, dl Download, collection string) {
 	}
 }
 
-func buildADownload(appId string, lo float64, la float64, time string, country string) Download {
+func buildADownload(appId string, lo string, la string, time string, country string) Download {
 	return Download{
 		AppId:        appId,
 		Longitude:    lo,
@@ -256,8 +293,8 @@ func buildADownload(appId string, lo float64, la float64, time string, country s
 func buildAStaticDownload() Download {
 	return buildADownload(
 		"IOS_ALERT",
-		45.0,
-		45.0,
+		"45.0",
+		"45.0",
 		"12:45.30.000",
 		"it",
 	)

@@ -19,6 +19,7 @@
             </div>
             <button class="btn btn-primary" @click="submit">Submit</button>
         </p>
+        <!-- <p v-show="correct">{{}}</p> -->
         <!-- <button @click='editAge()'>Edit Age</button> -->
     </div>
 </template>

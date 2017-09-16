@@ -130,7 +130,10 @@ export default {
         },
         getGeoJson(){
             return this.updatedMap === undefined ? this.geojson : this.updatedMap
-        }   
+        },
+        updatedMapValue(){
+            return this.updatedMap
+        }
 
     },
     components: {

@@ -60,7 +60,7 @@ func allDownloads(db *mgo.Database, collection string) func(w http.ResponseWrite
 			//Handle response with json - Input: writer, message, code
 			ErrorWithJSON(w, "Replace with message", http.StatusInternalServerError)
 			//Log the error
-			log.Println("Failed to get all books", err)
+			log.Println("Failed to get all downloads", err)
 			//Exit
 			return
 		}
@@ -134,14 +134,11 @@ func allDownloadsQuery(db *mgo.Database, collection string) ([]Download, error) 
 }
 
 func addDownloadInsert(db *mgo.Database, d Download, collection string) error {
-	//Get a new session
-	// session := s.Copy()
-	// defer session.Close()
 
 	//Get Collection
 	c := db.C(collection)
 
-	//Insert a book
+	//Insert a download
 	err := c.Insert(d)
 
 	return err
@@ -157,7 +154,7 @@ func getCountDlByCountry(db *mgo.Database, collection string) func(w http.Respon
 			//Handle response with json - Input: writer, message, code
 			ErrorWithJSON(w, "Replace with message", http.StatusInternalServerError)
 			//Log the error
-			log.Println("Failed to get all books", err)
+			log.Println("Failed to get all downloads", err)
 			//Exit
 			return
 		}
@@ -181,7 +178,7 @@ func countDownloadsByCountry(db *mgo.Database, collection string) ([]DownloadByC
 
 	var downloads []DownloadByCountry
 
-	pipeline := []bson.M{bson.M{"$group": bson.M{"_id": "$country", "count": bson.M{"$sum": "1"}}}}
+	pipeline := []bson.M{bson.M{"$group": bson.M{"_id": "$country", "count": bson.M{"$sum": 1}}}}
 
 	pipe := c.Pipe(pipeline)
 
