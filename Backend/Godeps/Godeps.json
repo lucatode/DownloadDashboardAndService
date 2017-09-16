@@ -1,0 +1,20 @@
+{
+    "ImportPath": "go-microservice",
+    "GoVersion": "go1.8",
+    "Deps": [
+        {
+            "ImportPath": "github.com/goji/goji",
+            "Rev": "0d89ff54b2c18c9c4ba530e32496aef902d3c6cd"
+        },
+        {
+            "ImportPath": "github.com/goji/goji/pat",
+            "Rev": "0d89ff54b2c18c9c4ba530e32496aef902d3c6cd"
+        },
+        {
+			"ImportPath": "gopkg.in/mgo.v2"
+        },
+        {
+			"ImportPath": "gopkg.in/mgo.v2/bson"
+		}
+    ]
+}

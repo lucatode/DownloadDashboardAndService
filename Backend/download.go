@@ -1,11 +1,11 @@
 package main
 
 type Download struct {
-	AppId        string  "json:appId"
-	Longitude    float64 "json:longitude"
-	Latitude     float64 "json:latitude"
-	DownloadedAt string  "json:downloadedAt"
-	Country      string  "json:country"
+	AppId        string "json:appId"
+	Longitude    string "json:longitude"
+	Latitude     string "json:latitude"
+	DownloadedAt string "json:downloadedAt"
+	Country      string "json:country"
 }
 
 type DownloadByCountry struct {

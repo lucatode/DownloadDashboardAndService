@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 )
 
 type country string
@@ -33,12 +32,9 @@ type Localization struct {
 }
 
 //Reverse geocode to find Country
-func NewLocation(lat float64, lon float64) string {
+func NewLocation(lat string, lon string) string {
 
-	stringuedLat := strconv.FormatFloat(lat, 'f', 6, 64)
-	stringuedLon := strconv.FormatFloat(lon, 'f', 6, 64)
-
-	url := "http://nominatim.openstreetmap.org/reverse?format=json&lat=" + stringuedLat + "&lon=" + stringuedLon + "&zoom=18&addressdetails=1"
+	url := "http://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lon + "&zoom=18&addressdetails=1"
 	res, err := http.Get(url)
 
 	if err != nil {

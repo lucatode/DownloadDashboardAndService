@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
+	"github.com/rs/cors"
 	goji "goji.io"
 	"goji.io/pat"
 	mgo "gopkg.in/mgo.v2"
@@ -16,12 +18,26 @@ func main() {
 
 	database := New()
 
-	http.ListenAndServe("localhost:8080", mux(database, "Downloads"))
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = "6060"
+	}
+
+	http.ListenAndServe(":"+port, mux(database, "TestCollection"))
 }
 
 ///Mux function
 func mux(db *mgo.Database, collection string) *goji.Mux {
 	mux := goji.NewMux()
+
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedHeaders: []string{"*"},
+		AllowedMethods: []string{"GET", "POST"},
+	})
+	mux.Use(c.Handler)
+
 	mux.HandleFunc(pat.Get("/downloads"), allDownloads(db, collection))
 	mux.HandleFunc(pat.Post("/downloads"), addDownload(db, collection))
 	mux.HandleFunc(pat.Get("/countDownloadsByCountry"), getCountDlByCountry(db, collection))
@@ -65,10 +81,16 @@ func allDownloads(db *mgo.Database, collection string) func(w http.ResponseWrite
 func addDownload(db *mgo.Database, collection string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// - Get download from arguments - Parse the request
+		if r.Body == nil {
+			http.Error(w, "Please send a request body", 400)
+			return
+		}
+
 		//return val
 		var download Download
 		//create a decoder for request body
 		decoder := json.NewDecoder(r.Body)
+		fmt.Println(r.Body)
 		//use the decoder
 		err := decoder.Decode(&download)
 		//...
@@ -174,7 +196,7 @@ func countDownloadsByCountry(db *mgo.Database, collection string) ([]DownloadByC
 }
 
 //Returns 2 chars country code
-func getCountry(lat float64, lng float64) string {
+func getCountry(lat string, lng string) string {
 	return NewLocation(lat, lng)
 }
 
@@ -184,6 +206,7 @@ func ErrorWithJSON(w http.ResponseWriter, message string, code int) {
 
 	//Set Writer header with Key and valueString
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	//Put the return code in the header
 	w.WriteHeader(code)
@@ -197,6 +220,10 @@ func ResponseWithJSON(w http.ResponseWriter, json []byte, code int) {
 
 	//Set Writer header with Key and valueString
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+
+	//
 
 	//Put the return code in the header
 	w.WriteHeader(code)
