@@ -1,7 +1,6 @@
 # Go Microservice With MongoDB
 
-### Require MongoDB run locally
-#### //TODO: make it configurable
+#### using MongoDB on mLab
 
 ## GET /downloads
 
