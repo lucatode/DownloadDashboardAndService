@@ -6,7 +6,7 @@ global.Raphael = Raphael
 
 Vue.use(VueResource);
 
-Vue.http.options.root = "http://localhost:6060"
+Vue.http.options.root = "https://gomicroservice.herokuapp.com"
 
 
 export const eventBus = new Vue({
