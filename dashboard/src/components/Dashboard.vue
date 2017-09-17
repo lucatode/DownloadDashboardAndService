@@ -28,6 +28,9 @@
             <div class="col-xs-6">
                 <insert-widget></insert-widget>
             </div>
+            <div class="col-xs-6">
+                <table-widget></table-widget>
+            </div>
         </div>
     </div>
 </template>
@@ -37,6 +40,7 @@
     import InsertWidget from './Widgets/InsertWidget.vue'
     import DonutChartWidget from './Widgets/DonutChartWidget.vue'
     import BarChartWidget from './Widgets/BarChartWidget.vue'
+    import TableWidget from './Widgets/TableWidget.vue'
     import {eventBus} from './../main'
 
     export default {
@@ -49,7 +53,8 @@
             'chart-widget': ChartWidget,
             'insert-widget': InsertWidget,
             'donut-chart-widget': DonutChartWidget,
-            'bar-chart-widget': BarChartWidget
+            'bar-chart-widget': BarChartWidget,
+            'table-widget': TableWidget
         },
         methods:{
             // updateMapWidget(){
