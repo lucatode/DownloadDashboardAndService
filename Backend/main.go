@@ -168,6 +168,18 @@ func getCountDlByCountry(db *mgo.Database, collection string) func(w http.Respon
 			return
 		}
 
+		//adding additional data on country
+		// var details []DownloadByCountryDetailed
+
+		// for _, download := range downloads {
+		// 	code2 := download.Country
+
+		// 	var dlCountDetail DownloadByCountryDetailed
+
+		// 	details = append(details, dlCountDetail)
+
+		// }
+
 		//Input: dbQueryResponse, prefix, indent
 		respBody, err := json.MarshalIndent(downloads, "", " ")
 
@@ -179,6 +191,19 @@ func getCountDlByCountry(db *mgo.Database, collection string) func(w http.Respon
 		ResponseWithJSON(w, respBody, http.StatusOK)
 
 	}
+}
+
+func getDetailsByAlpha2(db *mgo.Database, alpha2 string, collection string) CountryDetail {
+	c := db.C(collection)
+
+	var details CountryDetail
+	err := c.Find(bson.M{"alpha-2": alpha2}).All(&details)
+	if err != nil {
+		panic(err)
+	}
+
+	return details
+
 }
 
 func countDownloadsByCountry(db *mgo.Database, collection string) ([]DownloadByCountry, error) {

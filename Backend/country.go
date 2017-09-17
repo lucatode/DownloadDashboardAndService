@@ -31,6 +31,8 @@ type Localization struct {
 	Boundingbox []string `json:"boundingbox"`
 }
 
+
+
 //Reverse geocode to find Country
 func NewLocation(lat string, lon string) string {
 
@@ -54,5 +56,9 @@ func NewLocation(lat string, lon string) string {
 
 	countryName := m.Address.CountryCode
 
+
+
 	return countryName
 }
+
+

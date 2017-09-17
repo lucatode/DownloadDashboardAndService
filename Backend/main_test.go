@@ -145,6 +145,24 @@ func TestGetDownloadsByCountry_ko(t *testing.T) {
 	})
 }
 
+///////UTILITIES - MAIN
+func TestGetDetailsByAlpha2(t *testing.T) {
+	//Setup
+	session := NewTest()
+
+	//Execution
+	t.Run("Get downloads county by country - working", func(t *testing.T) {
+
+		res := getDetailsByAlpha2(session, "it", "CountryDictionary")
+
+		expectedCountryAlpha3 := "ITA"
+
+		//Assertions
+		assert.Equal(t, expectedCountryAlpha3, res.Alpha3)
+
+	})
+}
+
 /**************************************************
   ___          _          _____       _
  | _ \___ _  _| |_ ___ __|_   _|__ __| |_ ___

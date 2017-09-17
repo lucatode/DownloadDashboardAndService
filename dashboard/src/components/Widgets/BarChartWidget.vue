@@ -12,7 +12,6 @@
             resize="true">
         </bar-chart>
         <p v-else>No Data</p>
-        <button class="btn btn-primary" @click="refresh">Refresh</button>
     </div>
 </template>
 <script>
