@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/rs/cors"
 	goji "goji.io"
@@ -41,7 +42,7 @@ func mux(db *mgo.Database, collection string) *goji.Mux {
 	mux.HandleFunc(pat.Get("/downloads"), allDownloads(db, collection))
 	mux.HandleFunc(pat.Post("/downloads"), addDownload(db, collection))
 	mux.HandleFunc(pat.Get("/countDownloadsByCountry"), getCountDlByCountry(db, collection))
-	//mux.HandleFunc(pat.Get("/downloadsByCountry/:country"), downloadsByCountry(s, collection))
+	mux.HandleFunc(pat.Get("/downloadsByCountryDetail"), getCountDlByCountryDetail(db, collection))
 	//mux.HandleFunc(pat.Get("/countDownloadsByTime"), countDownloadsByTime(s, collection))
 	//mux.HandleFunc(pat.Get("/downloadsByTime/:time"), downloadsByTime(s, collection))
 
@@ -168,20 +169,50 @@ func getCountDlByCountry(db *mgo.Database, collection string) func(w http.Respon
 			return
 		}
 
-		//adding additional data on country
-		// var details []DownloadByCountryDetailed
-
-		// for _, download := range downloads {
-		// 	code2 := download.Country
-
-		// 	var dlCountDetail DownloadByCountryDetailed
-
-		// 	details = append(details, dlCountDetail)
-
-		// }
-
 		//Input: dbQueryResponse, prefix, indent
 		respBody, err := json.MarshalIndent(downloads, "", " ")
+
+		//Check error on Marshaling
+		if err != nil {
+			log.Fatal(err)
+		}
+		//Handle response with json - Input: writer, jsonBody, status
+		ResponseWithJSON(w, respBody, http.StatusOK)
+
+	}
+}
+
+func getCountDlByCountryDetail(db *mgo.Database, collection string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		//Query the db
+		downloads, err := countDownloadsByCountry(db, collection)
+
+		//Evaluate errors
+		if err != nil {
+			//Handle response with json - Input: writer, message, code
+			ErrorWithJSON(w, "Replace with message", http.StatusInternalServerError)
+			//Log the error
+			log.Println("Failed to get all downloads", err)
+			//Exit
+			return
+		}
+
+		//adding additional data on country
+		var downloadByCountryDetailed []DownloadByCountryDetailed
+
+		for _, download := range downloads {
+			code2 := download.Country
+			countryDetails := getDetailsByAlpha2(db, code2, "CountryDictionary")
+
+			var dlCountDetail DownloadByCountryDetailed
+			dlCountDetail.Count = download.Count
+			dlCountDetail.Details = countryDetails
+
+			downloadByCountryDetailed = append(downloadByCountryDetailed, dlCountDetail)
+		}
+
+		//Input: dbQueryResponse, prefix, indent
+		respBody, err := json.MarshalIndent(downloadByCountryDetailed, "", " ")
 
 		//Check error on Marshaling
 		if err != nil {
@@ -196,13 +227,18 @@ func getCountDlByCountry(db *mgo.Database, collection string) func(w http.Respon
 func getDetailsByAlpha2(db *mgo.Database, alpha2 string, collection string) CountryDetail {
 	c := db.C(collection)
 
-	var details CountryDetail
-	err := c.Find(bson.M{"alpha-2": alpha2}).All(&details)
+	var details []CountryDetail
+	upperA2 := strings.ToUpper(alpha2)
+	err := c.Find(bson.M{"alpha-2": upperA2}).All(&details)
 	if err != nil {
 		panic(err)
 	}
 
-	return details
+	if len(details) > 0 {
+		return details[0]
+	} else {
+		return CountryDetail{}
+	}
 
 }
 

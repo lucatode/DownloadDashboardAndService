@@ -15,8 +15,8 @@ type DownloadByCountry struct {
 
 type CountryDetail struct {
 	Name          string `json:"name"`
-	Alpha2        string `json:"alpha-2"`
-	Alpha3        string `json:"alpha-3"`
+	Alpha2        string `json:"alpha2" bson:"alpha-2,omitempty"`
+	Alpha3        string `json:"alpha3" bson:"alpha-3,omitempty"`
 	CountryCode   string `json:"country-code"`
 	Iso31662      string `json:"iso_3166-2"`
 	Region        string `json:"region"`
@@ -27,6 +27,5 @@ type CountryDetail struct {
 
 type DownloadByCountryDetailed struct {
 	Details CountryDetail `json:"CountryDetails"`
-	Count   int    `json:"Count"`
+	Count   int           `json:"Count"`
 }
-

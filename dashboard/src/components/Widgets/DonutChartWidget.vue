@@ -51,7 +51,7 @@
             prepareData(){
                 var array =[]
                 for (let key in this.downloads){
-                    array.push({ label: this.downloads[key].Country, value: this.downloads[key].Count })
+                    array.push({ label: this.downloads[key].CountryDetails.alpha3, value: this.downloads[key].Count })
                 }
                 this.donutData = array
 
@@ -66,9 +66,9 @@
         created(){ 
             //custom actions for vue-resource
             const customActions = {
-                getDownloadsByCountry: {method: 'GET', url:'countDownloadsByCountry'}
+                getDownloadsByCountry: {method: 'GET', url:'downloadsByCountryDetail'}
             }
-            this.resource = this.$resource('countDownloadsByCountry', {}, customActions);
+            this.resource = this.$resource('downloadsByCountryDetail', {}, customActions);
 
             this.refresh();
 
