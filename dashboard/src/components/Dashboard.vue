@@ -17,13 +17,18 @@
         </div> -->
         <div class="row">
             <div class="col-xs-6">
-                <insert-widget></insert-widget>
+                <bar-chart-widget></bar-chart-widget>
             </div>
             <div class="col-xs-6">
                 <donut-chart-widget></donut-chart-widget>
             </div>
         </div>
         <hr>
+        <div class="row">
+            <div class="col-xs-6">
+                <insert-widget></insert-widget>
+            </div>
+        </div>
     </div>
 </template>
 <script>
@@ -31,6 +36,7 @@
     import ChartWidget from './Widgets/ChartWidget.vue'
     import InsertWidget from './Widgets/InsertWidget.vue'
     import DonutChartWidget from './Widgets/DonutChartWidget.vue'
+    import BarChartWidget from './Widgets/BarChartWidget.vue'
     import {eventBus} from './../main'
 
     export default {
@@ -42,7 +48,8 @@
             'map-widget': MapWidget,
             'chart-widget': ChartWidget,
             'insert-widget': InsertWidget,
-            'donut-chart-widget': DonutChartWidget
+            'donut-chart-widget': DonutChartWidget,
+            'bar-chart-widget': BarChartWidget
         },
         methods:{
             // updateMapWidget(){

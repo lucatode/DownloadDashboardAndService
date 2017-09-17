@@ -106,6 +106,7 @@ func addDownload(db *mgo.Database, collection string) func(w http.ResponseWriter
 
 		if valid != true {
 			ErrorWithJSON(w, "Data passed not valid", http.StatusBadRequest)
+			return
 		}
 
 		err = addDownloadInsert(db, download, collection)
@@ -135,7 +136,7 @@ func allDownloadsQuery(db *mgo.Database, collection string) ([]Download, error) 
 
 	if len(downloads) == 0 {
 		fmt.Println("No documents in the db")
-		return downloads, fmt.Errorf("No documents in the db")
+		return downloads, nil
 	}
 
 	return downloads, nil
@@ -195,7 +196,6 @@ func countDownloadsByCountry(db *mgo.Database, collection string) ([]DownloadByC
 
 	if len(downloads) == 0 {
 		fmt.Println("No documents in the db")
-		return downloads, fmt.Errorf("No documents in the db")
 	}
 	return downloads, nil
 }

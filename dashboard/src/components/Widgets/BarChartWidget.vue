@@ -1,20 +1,23 @@
 <template>
     <div>
-        <h3>Donut Chart</h3>
+        <h3>Bar Chart</h3>
         <hr>
-        <donut-chart 
-            id="donut" 
-            :data="donutData" 
+        <bar-chart 
+            id="bar" 
+            :data="donutData"
+            xkey="label"
+            ykeys='["value"]'
+            grid="true"
             v-if="haveData"
             resize="true">
-        </donut-chart>
+        </bar-chart>
         <p v-else>No Data</p>
         <button class="btn btn-primary" @click="refresh">Refresh</button>
     </div>
 </template>
 <script>
     import {eventBus} from './../../main'
-    import { DonutChart } from 'vue-morris'
+    import { BarChart } from 'vue-morris'
 
     export default{
         data(){ 
@@ -24,7 +27,7 @@
             }
         },
         components:{
-            'donut-chart': DonutChart
+            'bar-chart': BarChart
         },
         methods:{
             refresh(){
@@ -53,6 +56,7 @@
                 var array =[]
                 for (let key in this.downloads){
                     array.push({ label: this.downloads[key].Country, value: this.downloads[key].Count })
+                
                 }
                 this.donutData = array
 

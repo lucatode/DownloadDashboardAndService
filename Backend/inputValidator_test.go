@@ -46,6 +46,20 @@ func TestValidateDownload_ok(t *testing.T) {
 	})
 }
 
+func TestValidateDownload_ko_2(t *testing.T) {
+	//Setup
+	//Create a download
+	d := NewDownload("iOS_App#1", "12", "18", "24:00", "it") //valid
+
+	//Execution
+	t.Run("Validate the download with valid fields", func(t *testing.T) {
+		valid := validateDownload(d)
+
+		//Assertions
+		assert.Equal(t, true, valid)
+	})
+}
+
 //Single Tests - ValidateAppId
 func TestValidateAppId_ko(t *testing.T) {
 	//Setup
