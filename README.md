@@ -9,7 +9,7 @@ Live demo: https://goo.gl/hQ2kyG
   - Recive and store data
   - Retrive data
   - Retriving downloads count per country
-  - (On working) Retriving downloads count for a specific country
+  - Retriving downloads count per country with details
   - (TODO) Retriving downloads count per time of the day
   - (TODO) Retriving downloads count for a specific time of the day
 
@@ -17,4 +17,5 @@ Live demo: https://goo.gl/hQ2kyG
   - Dashboard made of widgets
   - A Cholopleth map widget showing data for each country
   - (On working) Updatable Choropleth map
-  - (TODO) More widgets cointaining charts
+  - More widgets cointaining charts (Donut chart, bar chart) 
+  - Data table
