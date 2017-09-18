@@ -2,7 +2,7 @@
 
 #### Make http request to show data in the map - created with https://github.com/voluntadpear/vue-choropleth
 
-### Still not working
+#### Live demo: https://goo.gl/hQ2kyG
 
 ## Build Setup
 
