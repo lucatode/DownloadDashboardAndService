@@ -17,5 +17,5 @@ Live demo: https://goo.gl/hQ2kyG
   - Dashboard made of widgets
   - A Cholopleth map widget showing data for each country
   - (On working) Updatable Choropleth map
-  - More widgets cointaining charts (Donut chart, bar chart) 
-  - Data table
+  - More widgets cointaining charts (Donut chart, bar chart)
+  - Data table
