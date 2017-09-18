@@ -9,7 +9,7 @@ Live demo: https://goo.gl/hQ2kyG
   - Recive and store data
   - Retrive data
   - Retriving downloads count per country
-  - Retriving downloads count per country with details
+  - Retriving downloads count per country with details
   - (TODO) Retriving downloads count per time of the day
   - (TODO) Retriving downloads count for a specific time of the day
 
