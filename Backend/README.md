@@ -2,7 +2,7 @@
 
 #### using MongoDB on mLab
 
-## GET /downloads
+## GET /downloads - https://gomicroservices.herokuapp.com/downloads
 
 ``` bash
     [downloads:{_id,appid,latitude,longitude,country}, ...]
@@ -14,17 +14,21 @@
     downloads:{_id,appid,latitude,longitude}
 ```
 
-## GET /countDownloadsByCountry
+## GET /countDownloadsByCountry - https://gomicroservices.herokuapp.com/downloads
 
 ``` bash
     [downloadsCount:{country,Count}, ...]
 ```
 
-## GET /downloadsByCountry/:countryCode
+## GET /countDownloadsByCountryDetails - https://gomicroservices.herokuapp.com/downloadsByCountryDetail
 
 ``` bash
-    [downloadsCount:{country,Count}]
+    [downloadsCount:{CountryDetail{...},Count}]
 ```
+
+
+## GET /vueTableData - https://gomicroservices.herokuapp.com/vueTableData
+
 
 ### //TODO: GET /downloadsByTime/:dayTime
 
