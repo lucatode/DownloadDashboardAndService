@@ -43,7 +43,7 @@ func mux(db *mgo.Database, collection string) *goji.Mux {
 	mux.HandleFunc(pat.Post("/downloads"), addDownload(db, collection))
 	mux.HandleFunc(pat.Get("/countDownloadsByCountry"), getCountDlByCountry(db, collection))
 	mux.HandleFunc(pat.Get("/downloadsByCountryDetail"), getCountDlByCountryDetail(db, collection))
-	//mux.HandleFunc(pat.Get("/countDownloadsByTime"), countDownloadsByTime(s, collection))
+	mux.HandleFunc(pat.Get("/vueTableData"), getVueTableData(db, collection))
 	//mux.HandleFunc(pat.Get("/downloadsByTime/:time"), downloadsByTime(s, collection))
 
 	return mux
@@ -240,6 +240,59 @@ func getDetailsByAlpha2(db *mgo.Database, alpha2 string, collection string) Coun
 		return CountryDetail{}
 	}
 
+}
+
+func getVueTableData(db *mgo.Database, collection string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		//Query the db
+		downloads, err := countDownloadsByCountry(db, collection)
+
+		//Evaluate errors
+		if err != nil {
+			//Handle response with json - Input: writer, message, code
+			ErrorWithJSON(w, "Replace with message", http.StatusInternalServerError)
+			//Log the error
+			log.Println("Failed to get all downloads", err)
+			//Exit
+			return
+		}
+
+		//adding additional data on country
+		tableCount := TableDownloadCount{
+			Total:       5,
+			PerPage:     5,
+			CurrentPage: 1,
+			LastPage:    14,
+			From:        1,
+			To:          5,
+		}
+
+		var downloadByCountryDetailed []DownloadByCountryDetailed
+
+		for _, download := range downloads {
+			code2 := download.Country
+			countryDetails := getDetailsByAlpha2(db, code2, "CountryDictionary")
+
+			var dlCountDetail DownloadByCountryDetailed
+			dlCountDetail.Count = download.Count
+			dlCountDetail.Details = countryDetails
+
+			downloadByCountryDetailed = append(downloadByCountryDetailed, dlCountDetail)
+		}
+
+		tableCount.Data = downloadByCountryDetailed
+
+		//Input: dbQueryResponse, prefix, indent
+		respBody, err := json.MarshalIndent(tableCount, "", " ")
+
+		//Check error on Marshaling
+		if err != nil {
+			log.Fatal(err)
+		}
+		//Handle response with json - Input: writer, jsonBody, status
+		ResponseWithJSON(w, respBody, http.StatusOK)
+
+	}
 }
 
 func countDownloadsByCountry(db *mgo.Database, collection string) ([]DownloadByCountry, error) {

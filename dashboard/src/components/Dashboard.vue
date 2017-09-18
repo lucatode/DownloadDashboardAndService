@@ -1,6 +1,11 @@
 <template>
     <div class="container">
-        <h2>This will be dashboard header</h2>
+        <div class="row">
+            <div class="col-xs-12">
+                <h1>App Download Dashboard</h1>
+            </div>
+        </div>
+        <hr>
         <div class="row">
             <div class="col-xs-12">
                 <map-widget></map-widget>

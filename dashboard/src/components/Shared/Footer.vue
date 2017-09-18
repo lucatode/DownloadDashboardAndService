@@ -1,8 +1,8 @@
 <template>
     <div>
-        <button @click='refresh'>Refresh Dashboard</button>
+        <button class="btn btn-primary" @click='refresh'>Clear Map Data</button>
         <footer>
-            Made with Love
+            
         </footer>
         
     </div>

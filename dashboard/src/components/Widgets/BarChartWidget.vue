@@ -54,7 +54,7 @@
             prepareData(){
                 var array =[]
                 for (let key in this.downloads){
-                    array.push({ label: this.downloads[key].CountryDetails.name, value: this.downloads[key].Count })
+                    array.push({ label: this.downloads[key].CountryDetails.alpha3, value: this.downloads[key].Count })
                 
                 }
                 this.donutData = array

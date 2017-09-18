@@ -25,6 +25,18 @@ type CountryDetail struct {
 	SubRegionCode string `json:"sub-region-code"`
 }
 
+type TableDownloadCount struct {
+	Total       int                         `json:"total"`
+	PerPage     int                         `json:"per_page"`
+	CurrentPage int                         `json:"current_page"`
+	LastPage    int                         `json:"last_page"`
+	NextPageURL string                      `json:"next_page_url"`
+	PrevPageURL string                      `json:"prev_page_url"`
+	From        int                         `json:"from"`
+	To          int                         `json:"to"`
+	Data        []DownloadByCountryDetailed `json:"data"`
+}
+
 type DownloadByCountryDetailed struct {
 	Details CountryDetail `json:"CountryDetails"`
 	Count   int           `json:"Count"`
