@@ -1,6 +1,6 @@
 <template>
     <v-map id="map" :zoom="zoom" :center="center" :style="mapStyle" :options="mapOptions">
-        <v-geojson-layer :geojson="geojson" :options="getGeojsonOptions"></v-geojson-layer>
+        <v-geojson-layer :geojson="geojson" :options="getOptions"></v-geojson-layer>
         <slot :currentItem="currentItem" :unit="value.metric" :min="min" :max="max"></slot>
     </v-map>
 </template>
@@ -10,12 +10,13 @@ import {eventBus} from './../../../main'
 import InfoControl from './InfoControl.vue'
 import ReferenceChart from './ReferenceChart.vue'
 import Vue2Leaflet from 'vue2-leaflet'
+import GeoJSON from './GeoJSON.vue'
 import { getMin, getMax, normalizeValue, getColor } from './util'
 
 function mouseover({ target }) {
     target.setStyle({
         weight: 5,
-        color: "#666",
+        color: "#0B62A4",
         dashArray: ""
     })
 
@@ -79,43 +80,7 @@ export default {
         return {
             updatedData:undefined,
             updatedMap: undefined,
-            currentItem: { name: "", value: 0 },
-            geojsonOptions: {
-                style: feature => {
-                    let itemGeoJSONID = Number(feature.properties[this.geojsonIdKey])
-                    let color = "NONE"
-                    let item = this.getData().find(x => x[this.idKey] === itemGeoJSONID)
-                    if (!item) {
-                        return {
-                            color: "white",
-                            weight: 0
-                        }
-                    }
-                    // let canH = dpto.cantidad_h
-                    let valueParam = item[this.value.key]
-                    if (!Number(valueParam)) {
-                        return {
-                            color: "white",
-                            weight: 0
-                        }
-                    }
-                    const { min, max } = this
-                    return {
-                        weight: 2,
-                        opacity: 1,
-                        color: "white",
-                        dashArray: "3",
-                        fillOpacity: 0.7,
-                        fillColor: getColor(valueParam, this.colorScale, min, max)
-                    }
-                },
-                onEachFeature: (feature, layer) => {
-                    layer.on({
-                        mouseover: mouseover.bind(this),
-                        mouseout: mouseout.bind(this)
-                    })
-                },
-            },
+            currentItem: { name: "", value: 0 }
         }
     },
     computed: {
@@ -133,12 +98,61 @@ export default {
         },
         updatedMapValue(){
             return this.updatedMap
+        },
+        getOptions(){
+            return {
+                style: feature => {
+                    let itemGeoJSONID = Number(feature.properties[this.geojsonIdKey])
+                    let color = "NONE"
+                    let item = this.getData().find(x => x[this.idKey] === itemGeoJSONID)
+                    if (!item) {
+                        return {
+                            color: "white",
+                            weight: 0
+                        }
+                    }
+                    
+                    //Get quantity
+                    let valueParam = item[this.value.key]
+                    if (!Number(valueParam)) {
+                        return {
+                            color: "white",
+                            weight: 0
+                        }
+                    }
+                    //import funcs
+                    const { min, max } = this
+                    
+                    //build feature object
+                    return {
+                        weight: 2,
+                        opacity: 10,
+                        color: "white",
+                        dashArray: "3",
+                        fillOpacity: 0.7,
+                        fillColor: getColor(valueParam, this.colorScale, min, max)
+                    }
+                },
+                onEachFeature: (feature, layer) => {
+                    layer.on({
+                        mouseover: mouseover.bind(this),
+                        mouseout: mouseout.bind(this)
+                    })
+                },
+            }
+        },
+        getMap(){
+            if(updatedMap===undefined){
+                return this.geojson;
+            }
+            return this.updatedMap;
+
         }
 
     },
     components: {
         "v-map": Vue2Leaflet.Map,
-        "v-geojson-layer": Vue2Leaflet.GeoJSON,
+        "v-geojson-layer": GeoJSON,
         'v-tilelayer': Vue2Leaflet.TileLayer,
         InfoControl,
         ReferenceChart
@@ -150,18 +164,16 @@ export default {
             }else{
                 return this.updatedData
             }
-        }
+        },
     },
     mounted() {
 
     },
     created(){ //on component created
-            eventBus.$on('refreshMapData',(worldMap, updatedData) =>{
-                this.updatedMap = worldMap
-                this.updatedData = updatedData
-                
-                
-            })
+            // eventBus.$on('refreshMapData',(worldMap, updatedData) =>{
+            //     this.updatedMap = worldMap
+            //     this.updatedData = updatedData
+            // })
         }
 }
 </script>

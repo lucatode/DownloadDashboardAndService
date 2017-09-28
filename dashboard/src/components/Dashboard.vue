@@ -21,8 +21,13 @@
             </div>
         </div> -->
         <div class="row">
-            <div class="col-xs-6">
+            <div class="col-xs-12">
                 <bar-chart-widget></bar-chart-widget>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6">
+                <insert-widget></insert-widget>
             </div>
             <div class="col-xs-6">
                 <donut-chart-widget></donut-chart-widget>
@@ -30,10 +35,7 @@
         </div>
         <hr>
         <div class="row">
-            <div class="col-xs-6">
-                <insert-widget></insert-widget>
-            </div>
-            <div class="col-xs-6">
+            <div class="col-xs-12">
                 <table-widget></table-widget>
             </div>
         </div>

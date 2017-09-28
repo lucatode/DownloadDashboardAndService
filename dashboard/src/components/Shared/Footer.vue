@@ -14,8 +14,9 @@ import {eventBus} from './../../main'
 export default{
     methods:{
         refresh(){
-            eventBus.refresh()
-            eventBus.refreshView()
+            eventBus.refresh();
+            console.log('footer');
+            //eventBus.refreshView()
         }
     }
 }

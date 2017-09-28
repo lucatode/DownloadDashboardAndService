@@ -1,7 +1,7 @@
 <template>
     <div>       
         <ChoroplethMap 
-            :data="pyDepartmentsData" 
+            :data="pyDepartmentsDataReal" 
             titleKey="department_name" 
             idKey="id" :value="value" 
             :extraValues="extraValues" 
@@ -36,9 +36,9 @@
         },
         data(){ 
             return{
-                center: [0, 0],
+                center: [45, 15],
                 notUpdating: true,
-                colorScale: ["000000", "cccccc", "ffffff"],
+                colorScale: ["b0cce1", "3980b5", "0b62a4"],
                 value: {
                     key: "amount_w",
                     metric: " downloads"
@@ -48,13 +48,13 @@
                     metric: " downloads"
                 }],
                 mapOptions: {
-                    attributionControl: true
+                    attributionControl: false
                 },
                 zero: false
             }
         },
         computed:{
-            pyDepartmentsData: function(){
+            pyDepartmentsDataReal: function(){
                 return this.zero ? pyDepartmentsDataZero: pyDepartmentsData
             },
             inverseDepData: function(){
@@ -62,21 +62,65 @@
             },
             worldGeojson: function(){
                 return worldGeojson
+            },
+            mapDataComputed: ()=>{
+                return this.mapData
+            },
+            haveData(){
+                return this.mapData.length > 0
             }
 
         },
         methods:{  
+            refresh(){
+                this.resource.getDownloadsByCountry()
+                .then(
+                response => { 
+                    console.log(response)
+                    return response.json()
+                }, 
+                error =>{
+                    console.log(error)
+                }
+                ).then(data => { 
+                const resultArray= [];
+
+                console.log(data)
+                for (let key in data){
+                    resultArray.push(data[key])
+                }
+                this.downloads = resultArray
+                console.log(resultArray)
+                this.prepareData()
+                })
+            },
+            prepareData(){
+                var array =[]
+                for (let key in this.downloads){
+                    array.push({ label: this.downloads[key].CountryDetails.alpha3, value: this.downloads[key].Count })
+                }
+                this.mapData = array
+
+            }
         },
         created(){ //on component created
+            const customActions = {
+                getDownloadsByCountry: {method: 'GET', url:'downloadsByCountryDetail'}
+            }
+            this.resource = this.$resource('downloadsByCountryDetail', {}, customActions);
+
+            this.refresh();
+            
+
+
             eventBus.$on('refreshMap',(data)=>{ //register on event
                 if(this.zero === false){
-                    eventBus.callRefreshMapData(this.worldGeojson,this.pyDepartmentsDataZero )
-                    console.log('zero')
+                    eventBus.callRefreshMapData(this.worldGeojson,this.pyDepartmentsDataReal )
+                    console.log('zero',this.pyDepartmentsDataReal)
                 }else{
                     eventBus.callRefreshMapData(this.worldGeojson,this.pyDepartmentsData )
                     console.log('normal')
                 }
-                this.$forceUpdate()
                 this.zero = !this.zero 
          
             })
