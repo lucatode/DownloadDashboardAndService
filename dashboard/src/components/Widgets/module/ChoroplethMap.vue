@@ -1,7 +1,7 @@
 <template>
     <v-map id="map" :zoom="zoom" :center="center" :style="mapStyle" :options="mapOptions">
         <v-geojson-layer :geojson="geojson" :options="getOptions"></v-geojson-layer>
-        <slot :currentItem="currentItem" :unit="value.metric" :min="min" :max="max"></slot>
+        <!--slot :currentItem="currentItem" :unit="value.metric" :min="min" :max="max"></slot-->
     </v-map>
 </template>
 
@@ -24,14 +24,35 @@ function mouseover({ target }) {
         target.bringToFront()
     }
 
-    let geojsonItem = target.feature.properties
+    let geojsonItem = target.feature
 
-    let item = this.getData().find(x => x[this.idKey] === Number(geojsonItem[this.geojsonIdKey]))
-    let itemName = geojsonItem["name"];
-    if (!item || !itemName) {
-    this.currentItem = { name: "", value: 0 }
+
+    if(this.getData === undefined){
+        this.currentItem = { name: "", value: 0 } 
+        return;
+    }
+
+    //let item = this.getData.find(x => x[this.idKey] === Number(geojsonItem[this.geojsonIdKey]))
+
+
+    let itemGeoJSONID = geojsonItem[this.geojsonIdKey]
+    if(this.getData === undefined){
+        console.log(this.getData)
+    }
+
+    let item = this.getData.find(x => x[this.idKey] === itemGeoJSONID)
+    let itemName = geojsonItem.properties["name"];
+    
+    if(!itemName){
+        this.currentItem = { name: "", value: 0 }
+        console.log('no item:'+item)
+    }else if (!item ) {
+    this.currentItem = { name: itemName, value: 0 }
+    eventBus.sendCountryDataToWidget(this.currentItem.name, this.currentItem.value);
+    console.log('itemName: '+itemName+', no item:'+item)
     }else{
-        let tempItem = { name: itemName, value: item[this.value.key] }
+        let tempItem = { name: itemName, value: item.value }
+
         if (this.extraValues) {
             let tempValues = [];
             for (let x of this.extraValues) {
@@ -44,6 +65,7 @@ function mouseover({ target }) {
             tempItem = {name: tempItem.name, value:tempItem.value, extraValues: tempValues}
         }
             this.currentItem = tempItem
+            eventBus.sendCountryDataToWidget(this.currentItem.name, this.currentItem.value);
     }
 
 
@@ -99,30 +121,48 @@ export default {
         updatedMapValue(){
             return this.updatedMap
         },
+        getData(){
+            if(this.updatedData===undefined){
+                return this.data
+            }else{
+                return this.updatedData
+            }
+        },
         getOptions(){
             return {
                 style: feature => {
-                    let itemGeoJSONID = Number(feature.properties[this.geojsonIdKey])
+                    let itemGeoJSONID = Number(feature[this.geojsonIdKey])
                     let color = "NONE"
-                    let item = this.getData().find(x => x[this.idKey] === itemGeoJSONID)
+                    if(this.getData === undefined){
+                        console.log('no data');
+                        return {                            
+                            color: "white",
+                            weight:2
+                        }
+                    }
+
+                    let item = this.getData.find(x => x[this.idKey] === itemGeoJSONID)
                     if (!item) {
+                        console.log('item not found');
                         return {
                             color: "white",
-                            weight: 0
+                            weight: 2
                         }
                     }
                     
                     //Get quantity
                     let valueParam = item[this.value.key]
                     if (!Number(valueParam)) {
+                        console.log('quantity not found');
                         return {
                             color: "white",
-                            weight: 0
+                            weight: 2
                         }
                     }
                     //import funcs
                     const { min, max } = this
                     
+                    console.log('value param:', valueParam);
                     //build feature object
                     return {
                         weight: 2,
@@ -130,8 +170,10 @@ export default {
                         color: "white",
                         dashArray: "3",
                         fillOpacity: 0.7,
-                        fillColor: getColor(valueParam, this.colorScale, min, max)
+                        fillColor: "black"
                     }
+
+                    //getColor(valueParam, this.colorScale, min, max)
                 },
                 onEachFeature: (feature, layer) => {
                     layer.on({
@@ -158,22 +200,18 @@ export default {
         ReferenceChart
     },
     methods:{
-        getData(){
-            if(this.updatedData===undefined){
-                return this.data
-            }else{
-                return this.updatedData
-            }
-        },
+        
     },
     mounted() {
 
     },
     created(){ //on component created
-            // eventBus.$on('refreshMapData',(worldMap, updatedData) =>{
-            //     this.updatedMap = worldMap
-            //     this.updatedData = updatedData
-            // })
+            eventBus.$on('refreshMapData',(worldMap, updatedData) =>{
+                this.updatedMap = worldMap
+                console.log('updated data', updatedData)
+                this.updatedData = updatedData
+            })
+            eventBus.refresh();
         }
 }
 </script>

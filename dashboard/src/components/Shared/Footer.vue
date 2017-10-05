@@ -15,7 +15,7 @@ export default{
     methods:{
         refresh(){
             eventBus.refresh();
-            console.log('footer');
+            //console.log('footer');
             //eventBus.refreshView()
         }
     }

@@ -30,21 +30,21 @@
                 this.resource.getDownloadsByCountry()
                 .then(
                 response => { 
-                    console.log(response)
+                    //console.logresponse)
                     return response.json()
                 }, 
                 error =>{
-                    console.log(error)
+                    //console.logerror)
                 }
                 ).then(data => { 
                 const resultArray= [];
 
-                console.log(data)
+                //console.logdata)
                 for (let key in data){
                     resultArray.push(data[key])
                 }
                 this.downloads = resultArray
-                console.log(resultArray)
+                //console.logresultArray)
                 this.prepareData()
                 })
             }, 

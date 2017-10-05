@@ -24,7 +24,7 @@ export default {
     }
   },
   beforeUpdate(){
-    console.log('before update')
+    //console.log('before update')
     this.$geoJSON = L.geoJSON(this.geojson, this.options);
 
     if (this.$parent._isMounted) {
@@ -71,27 +71,42 @@ export default {
   },
   created(){ //on component created
     eventBus.$on('refreshMapData', (worldMap, updatedData) =>{
-      console.log('updated Data', updatedData)
+      //console.log('updated Data', updatedData)
       this.mapOptions.style = 
         feature => {
-          let itemGeoJSONID = Number(feature.properties[this.geojsonIdKey])
+          let itemGeoJSONID = feature.id
           let color = "NONE"
-          let item = updatedData.find(x => x[this.idKey] === itemGeoJSONID)
+          if(updatedData === undefined){
+              //console.log('no data');
+              return {                            
+                  color: "white",
+                  weight: 0
+              }
+          }
+          //console.log(updatedData)
+          let item = updatedData.find(x => x["code"] === itemGeoJSONID)
           if (!item) {
+              //console.log('item not found', itemGeoJSONID);
               return {
                   color: "white",
                   weight: 0
               }
           }
-          // let canH = dpto.cantidad_h
-          let valueParam = item[this.value.key]
+          
+          //Get quantity
+          let valueParam = item["count"]
           if (!Number(valueParam)) {
+              //console.log('quantity not found');
               return {
                   color: "white",
                   weight: 0
               }
           }
+          //import funcs
           const { min, max } = this
+          
+          //console.log('value param:', valueParam);
+          //build feature object
           return {
               weight: 2,
               opacity: 10,
@@ -100,7 +115,9 @@ export default {
               fillOpacity: 0.7,
               fillColor: getColor(valueParam, this.colorScale, min, max)
           }
-        } 
+
+          //getColor(valueParam, this.colorScale, min, max)
+      }
         var newLayer = L.geoJSON(worldMap, this.mapOptions);
         this.parent.removeLayer(this.$geoJSON);
         this.$geoJSON = newLayer

@@ -1,21 +1,37 @@
 <template>
-    <div>       
-        <ChoroplethMap 
-            :data="pyDepartmentsDataReal" 
-            titleKey="department_name" 
-            idKey="id" :value="value" 
-            :extraValues="extraValues" 
-            geojsonIdKey="id" 
-            :geojson="worldGeojson" 
-            :center="center" 
-            :colorScale="colorScale" 
-            mapStyle="height: 400px;" 
-            :zoom="3" 
-            :mapOptions="mapOptions">
-        <template scope="props">
-            <InfoControl :item="props.currentItem" :unit="props.unit" title="Country" placeholder="Hover over a country"></InfoControl>
-        </template>
-        </ChoroplethMap>
+    <div class="container">       
+<!-- 
+     idKey="alpha3"  //alpha3 - code retrived from server
+-->
+        <div class="row">
+            <ChoroplethMap 
+                class="col-xs-12"
+                :data="mapDataComputed" 
+                titleKey="department_name" 
+                idKey="code"  
+                :value="value" 
+                :extraValues="extraValues" 
+                geojsonIdKey="id" 
+                :geojson="worldGeojson" 
+                :center="center" 
+                :colorScale="colorScale" 
+                mapStyle="height: 400px;" 
+                :zoom="3" 
+                :mapOptions="mapOptions">
+                <!--template scope="props"-->
+                    <!--InfoControl :item="props.currentItem" :unit="props.unit" title="Country" placeholder="Hover over a country"></InfoControl-->
+                <!--/template-->
+            </ChoroplethMap>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-xs-4">
+                <ul class="list-group">
+                    <li class="list-group-item">Country: {{selectedCountry.name}}</li>
+                    <li class="list-group-item">Stat: {{selectedCountry.value}}</li>
+                </ul>
+            </div>
+        </div>  
     </div>
 </template>
 <script>
@@ -40,7 +56,7 @@
                 notUpdating: true,
                 colorScale: ["b0cce1", "3980b5", "0b62a4"],
                 value: {
-                    key: "amount_w",
+                    key: "value",
                     metric: " downloads"
                 },
                 extraValues: [{
@@ -49,6 +65,11 @@
                 }],
                 mapOptions: {
                     attributionControl: false
+                },
+                mapData: [],
+                selectedCountry: {
+                    name: "",
+                    value: -1
                 },
                 zero: false
             }
@@ -90,37 +111,42 @@
                     resultArray.push(data[key])
                 }
                 this.downloads = resultArray
-                console.log(resultArray)
+                console.log('get data, dowloads: ',resultArray)
                 this.prepareData()
                 })
             },
             prepareData(){
+                console.log('prepareData', this.downloads)
                 var array =[]
                 for (let key in this.downloads){
-                    array.push({ label: this.downloads[key].CountryDetails.alpha3, value: this.downloads[key].Count })
+                    array.push({ code: this.downloads[key].CountryDetails.alpha3, value: this.downloads[key].Count })
                 }
+                
                 this.mapData = array
-
+                console.log('prepared array',this.mapData)
+                eventBus.callRefreshMapData(this.worldGeojson,this.mapData )
             }
         },
         created(){ //on component created
+            //custom actions for vue-resource
             const customActions = {
                 getDownloadsByCountry: {method: 'GET', url:'downloadsByCountryDetail'}
             }
             this.resource = this.$resource('downloadsByCountryDetail', {}, customActions);
-
-            this.refresh();
             
+            eventBus.$on('sendCountryDataToWidget',(name, value)=>{ //register on event sendCountryDataToWidget
 
+                this.selectedCountry.name = name;
+                this.selectedCountry.value = value;
+                console.log('name', name)
+         
+            })
 
-            eventBus.$on('refreshMap',(data)=>{ //register on event
-                if(this.zero === false){
-                    eventBus.callRefreshMapData(this.worldGeojson,this.pyDepartmentsDataReal )
-                    console.log('zero',this.pyDepartmentsDataReal)
-                }else{
-                    eventBus.callRefreshMapData(this.worldGeojson,this.pyDepartmentsData )
-                    console.log('normal')
-                }
+            eventBus.$on('refreshMap',(data)=>{ //register on event sendCountryDataToWidget
+
+                this.refresh()
+
+                console.log('zero',this.mapData)
                 this.zero = !this.zero 
          
             })

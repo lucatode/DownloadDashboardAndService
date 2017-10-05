@@ -23,7 +23,10 @@ export const eventBus = new Vue({
     },
     refreshView(){
       this.$forceUpdate()
-    }   
+    },
+    sendCountryDataToWidget(name,value){
+      this.$emit('sendCountryDataToWidget',name,value);
+    } 
   }
 });
 

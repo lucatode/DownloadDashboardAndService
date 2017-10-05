@@ -78,11 +78,11 @@
             submit(){
                 this.resource.postDownload(this.download).then(response =>{}, error=>{
                     response => { 
-                    console.log(response)
+                    //console.logresponse)
                     return response.json()
                     }, 
                     error =>{
-                        console.log(error)
+                        //console.logerror)
                     }
                 }) //TODO add promise
             },
@@ -101,7 +101,7 @@
             },
 
             logSubmit(){
-                console.log("Logging post"+this.download)
+                //console.log"Logging post"+this.download)
             }
         },
         computed:{
