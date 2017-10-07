@@ -8,5 +8,7 @@ export const getMax = (array, key) =>
 
 export const normalizeValue = (value, min, max) => (value - min) / (max - min)
 
-export const getColor = (param, colorScale, min, max) =>
+export const getColor = (param, colorScale, min, max) =>{
   chroma.scale(colorScale).mode("lch")(normalizeValue(param, min, max)).hex()
+}
+ 

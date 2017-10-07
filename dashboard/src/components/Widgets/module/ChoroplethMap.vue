@@ -24,7 +24,7 @@ function mouseover({ target }) {
         target.bringToFront()
     }
 
-    let geojsonItem = target.feature
+    let geojsonItem = target.feature.properties
 
 
     if(this.getData === undefined){
@@ -41,7 +41,8 @@ function mouseover({ target }) {
     }
 
     let item = this.getData.find(x => x[this.idKey] === itemGeoJSONID)
-    let itemName = geojsonItem.properties["name"];
+    console.log(geojsonItem.properties)
+    let itemName = geojsonItem["NAME"];
     
     if(!itemName){
         this.currentItem = { name: "", value: 0 }
@@ -131,11 +132,10 @@ export default {
         getOptions(){
             return {
                 style: feature => {
-                    let itemGeoJSONID = Number(feature[this.geojsonIdKey])
+                    let itemGeoJSONID = feature.properties[this.geojsonIdKey]
                     let color = "NONE"
                     if(this.getData === undefined){
-                        console.log('no data');
-                        return {                            
+                                        return {                            
                             color: "white",
                             weight:2
                         }
@@ -170,7 +170,7 @@ export default {
                         color: "white",
                         dashArray: "3",
                         fillOpacity: 0.7,
-                        fillColor: "black"
+                        fillColor: getColor(valueParam, this.colorScale, min, max)
                     }
 
                     //getColor(valueParam, this.colorScale, min, max)

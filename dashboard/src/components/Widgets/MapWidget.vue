@@ -11,7 +11,7 @@
                 idKey="code"  
                 :value="value" 
                 :extraValues="extraValues" 
-                geojsonIdKey="id" 
+                geojsonIdKey="ISO_A3" 
                 :geojson="worldGeojson" 
                 :center="center" 
                 :colorScale="colorScale" 
